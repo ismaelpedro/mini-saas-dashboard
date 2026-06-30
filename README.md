@@ -194,30 +194,35 @@ npm test
 
 The schema runs on a managed **Supabase** Postgres. Use the connection **pooler** host
 (`Connect → Session pooler`); the direct `db.<ref>.supabase.co` host is not exposed on the
-free plan.
+free plan. The pooler uses a private CA, so append `uselibpqcompat=true` so `pg` encrypts
+without failing certificate verification.
 
 ```bash
 # Migrations & seeding — Session pooler, port 5432
-export DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require"
+export DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require&uselibpqcompat=true"
 npm run db:deploy   # prisma migrate deploy
 npm run db:seed
-
-# App runtime (serverless) — Transaction pooler, port 6543
-DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
 ```
 
-Once the schema exists, Supabase **auto-generates a REST API** (PostgREST) over the tables,
-e.g. `GET https://<ref>.supabase.co/rest/v1/Project?select=*` with the project's API key.
-The app itself does not use it — it talks to Postgres directly through Prisma — so for a real
-deployment enable **Row Level Security** policies before exposing the anon key.
+Supabase **auto-generates a REST API** (PostgREST) over the tables, e.g.
+`GET https://<ref>.supabase.co/rest/v1/Project?select=*` with the project's API key.
+The `add_rls_and_indexes` migration enables **Row Level Security** (deny-by-default) on every
+table, so the auto-API returns nothing to the anon key while the app — which connects as the
+table owner through Prisma — keeps full access. Password hashes and project data are never
+exposed through the public API.
 
-### App on Vercel
+### App on Render (free Node host)
 
-1. Import the repo into Vercel.
-2. Set env vars `DATABASE_URL` (Supabase transaction pooler) and `JWT_SECRET`.
-3. Run `prisma migrate deploy` against the database (and optionally `npm run db:seed`).
+Supabase hosts the database, not the Next.js server, so the app runs on any Node host. A
+[`render.yaml`](render.yaml) blueprint is included:
 
-The `Dockerfile` / `docker-compose.yml` also make the full stack portable to any container host.
+1. Render → **New → Blueprint**, select this repo.
+2. Set the secret env vars: `DATABASE_URL` (Supabase pooler, with `sslmode=require&uselibpqcompat=true`)
+   and `JWT_SECRET` (≥ 32 chars, `openssl rand -base64 32`).
+3. Deploy. Migrations are already applied to Supabase; re-run `npm run db:deploy` if the schema changes.
+
+The `Dockerfile` / `docker-compose.yml` also make the full stack portable to any container host
+(`docker compose up --build`).
 
 ## Project structure
 
