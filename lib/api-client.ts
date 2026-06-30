@@ -9,7 +9,6 @@ export class ApiError extends Error {
   }
 }
 
-/** Thin JSON fetch wrapper that throws ApiError on non-2xx responses. */
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...options,

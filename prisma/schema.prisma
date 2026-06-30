@@ -1,5 +1,4 @@
-// Prisma schema for the Mini SaaS Dashboard.
-// Prisma 7: uses the `prisma-client` generator with a driver adapter (@prisma/adapter-pg).
+// Prisma 7: `prisma-client` generator + driver adapter (@prisma/adapter-pg).
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"

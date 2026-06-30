@@ -18,7 +18,6 @@ function orderByFor(sort: string | null) {
   }
 }
 
-// GET /api/projects?status=&q=&sort= — list the current user's projects.
 export async function GET(request: NextRequest) {
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -40,7 +39,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ projects });
 }
 
-// POST /api/projects — create a project owned by the current user.
 export async function POST(request: NextRequest) {
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

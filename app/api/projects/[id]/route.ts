@@ -7,7 +7,6 @@ const memberSelect = { select: { id: true, name: true, email: true } };
 
 type Params = { params: Promise<{ id: string }> };
 
-// GET /api/projects/:id — fetch one owned project.
 export async function GET(_request: NextRequest, { params }: Params) {
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,7 +21,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
   return NextResponse.json({ project });
 }
 
-// PUT /api/projects/:id — replace an owned project.
 export async function PUT(request: NextRequest, { params }: Params) {
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -55,7 +53,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
   return NextResponse.json({ project });
 }
 
-// DELETE /api/projects/:id — delete an owned project.
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const userId = await getSessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

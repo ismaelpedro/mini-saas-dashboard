@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Design tokens (light theme). Mapped to Tailwind utilities via @theme inline. */
 :root {
   --background: hsl(210 40% 98%);
   --foreground: hsl(222 47% 11%);
