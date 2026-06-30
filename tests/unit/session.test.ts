@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { signSession, verifySession } from "@/lib/session";
 
-process.env.JWT_SECRET ||= "test-secret-not-for-production";
+process.env.JWT_SECRET ||= "test-secret-not-for-production-0123456789";
 
 describe("session", () => {
   it("signs and verifies a session token", async () => {
