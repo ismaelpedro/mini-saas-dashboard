@@ -26,6 +26,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mini_saas
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mini_saas
       JWT_SECRET: ci-test-secret-value-not-for-production
 
     steps:
