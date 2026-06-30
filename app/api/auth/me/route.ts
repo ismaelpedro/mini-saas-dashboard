@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
+import { route, unauthorized } from "@/lib/api";
 import { getCurrentUser } from "@/lib/dal";
 
-export async function GET() {
+export const GET = route(async () => {
   const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!user) return unauthorized();
   return NextResponse.json({ user });
-}
+});

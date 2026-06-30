@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSessionUserId } from "@/lib/dal";
+import { requireUser, route } from "@/lib/api";
 
-export async function GET() {
-  const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const GET = route(async () => {
+  const auth = await requireUser();
+  if ("error" in auth) return auth.error;
 
   const teamMembers = await prisma.teamMember.findMany({
     orderBy: { name: "asc" },
     select: { id: true, name: true, email: true },
   });
-
   return NextResponse.json({ teamMembers });
-}
+});

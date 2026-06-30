@@ -1,66 +1,53 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSessionUserId } from "@/lib/dal";
-import { projectSchema } from "@/lib/validations";
-
-const memberSelect = { select: { id: true, name: true, email: true } };
+import { notFound, requireUser, route } from "@/lib/api";
+import { memberSelect, parseProjectInput } from "@/lib/projects";
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_request: NextRequest, { params }: Params) {
-  const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+function ownedProject(id: string, ownerId: string) {
+  return prisma.project.findFirst({ where: { id, ownerId } });
+}
+
+export const GET = route(async (_request: NextRequest, { params }: Params) => {
+  const auth = await requireUser();
+  if ("error" in auth) return auth.error;
 
   const { id } = await params;
   const project = await prisma.project.findFirst({
-    where: { id, ownerId: userId },
+    where: { id, ownerId: auth.userId },
     include: { teamMember: memberSelect },
   });
-  if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
+  if (!project) return notFound();
   return NextResponse.json({ project });
-}
+});
 
-export async function PUT(request: NextRequest, { params }: Params) {
-  const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const PUT = route(async (request: NextRequest, { params }: Params) => {
+  const auth = await requireUser();
+  if ("error" in auth) return auth.error;
 
   const { id } = await params;
-  const existing = await prisma.project.findFirst({ where: { id, ownerId: userId } });
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await ownedProject(id, auth.userId))) return notFound();
 
-  const body = await request.json().catch(() => null);
-  const parsed = projectSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
+  const input = await parseProjectInput(request);
+  if ("error" in input) return input.error;
 
-  const { name, status, deadline, budget, teamMemberId } = parsed.data;
-  const member = await prisma.teamMember.findUnique({ where: { id: teamMemberId } });
-  if (!member) {
-    return NextResponse.json({ error: "Team member not found" }, { status: 400 });
-  }
-
+  const { name, status, deadline, budget, teamMemberId } = input.data;
   const project = await prisma.project.update({
     where: { id },
     data: { name, status, deadline: new Date(deadline), budget, teamMemberId },
     include: { teamMember: memberSelect },
   });
-
   return NextResponse.json({ project });
-}
+});
 
-export async function DELETE(_request: NextRequest, { params }: Params) {
-  const userId = await getSessionUserId();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const DELETE = route(async (_request: NextRequest, { params }: Params) => {
+  const auth = await requireUser();
+  if ("error" in auth) return auth.error;
 
   const { id } = await params;
-  const existing = await prisma.project.findFirst({ where: { id, ownerId: userId } });
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await ownedProject(id, auth.userId))) return notFound();
 
   await prisma.project.delete({ where: { id } });
   return NextResponse.json({ ok: true });
-}
+});

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { route } from "@/lib/api";
 import { SESSION_COOKIE } from "@/lib/session";
 
-export async function POST() {
+export const POST = route(async () => {
   (await cookies()).delete(SESSION_COOKIE);
   return NextResponse.json({ ok: true });
-}
+});

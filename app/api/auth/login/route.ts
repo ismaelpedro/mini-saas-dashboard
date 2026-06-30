@@ -2,23 +2,19 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth";
+import { jsonError, route, validationError } from "@/lib/api";
 import { loginSchema } from "@/lib/validations";
 import { SESSION_COOKIE, sessionCookieOptions, signSession } from "@/lib/session";
 
-export async function POST(request: Request) {
+export const POST = route(async (request: Request) => {
   const body = await request.json().catch(() => null);
   const parsed = loginSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
+  if (!parsed.success) return validationError(parsed.error);
 
   const { email, password } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !(await verifyPassword(password, user.password))) {
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    return jsonError("Invalid email or password", 401);
   }
 
   const token = await signSession({ userId: user.id });
@@ -27,4 +23,4 @@ export async function POST(request: Request) {
   return NextResponse.json({
     user: { id: user.id, name: user.name, email: user.email },
   });
-}
+});
