@@ -4,7 +4,6 @@ import { DashboardHeader } from "@/components/dashboard-header";
 import { ProjectsView } from "@/components/projects-view";
 
 export default async function DashboardPage() {
-  // The proxy already guards this route; this is a defensive fallback.
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

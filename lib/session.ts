@@ -1,11 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
-// Edge-safe session helpers (jose / Web Crypto only). No next/headers or Node
-// APIs here, so this module is importable from both the Edge proxy and Node
-// route handlers.
-
 export const SESSION_COOKIE = "session";
-const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+const MAX_AGE = 60 * 60 * 24 * 7;
 
 export const sessionCookieOptions = {
   httpOnly: true,

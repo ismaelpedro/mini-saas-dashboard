@@ -3,20 +3,25 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 
-// Load TEST_DATABASE_URL / JWT_SECRET for the integration suite (no-op in CI,
-// where these come from the job environment).
 loadEnv({ path: ".env.test" });
 
+const alias = { "@": fileURLToPath(new URL(".", import.meta.url)) };
+const shared = { globals: true, setupFiles: ["./vitest.setup.ts"] };
+
 export default defineConfig({
-  plugins: [react()],
+  resolve: { alias },
   test: {
-    environment: "jsdom",
-    setupFiles: ["./vitest.setup.ts"],
-    globals: true,
-    include: ["tests/**/*.test.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "app/generated"],
-  },
-  resolve: {
-    alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
+    projects: [
+      {
+        plugins: [react()],
+        resolve: { alias },
+        test: { ...shared, name: "node", environment: "node", include: ["tests/**/*.test.ts"] },
+      },
+      {
+        plugins: [react()],
+        resolve: { alias },
+        test: { ...shared, name: "dom", environment: "jsdom", include: ["tests/**/*.test.tsx"] },
+      },
+    ],
   },
 });

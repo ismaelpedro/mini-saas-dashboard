@@ -17,7 +17,6 @@ const DEMO_USER = {
 
 type SeedMember = { name: string; email: string };
 
-/** Fetch team members from the JSONPlaceholder public API, with an offline faker fallback. */
 async function getTeamMembers(): Promise<SeedMember[]> {
   try {
     const res = await fetch("https://jsonplaceholder.typicode.com/users");
@@ -34,7 +33,6 @@ async function getTeamMembers(): Promise<SeedMember[]> {
 }
 
 async function main() {
-  // Clean slate so the seed is idempotent.
   await prisma.project.deleteMany();
   await prisma.user.deleteMany();
   await prisma.teamMember.deleteMany();

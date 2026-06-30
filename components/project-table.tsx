@@ -31,7 +31,6 @@ export function ProjectTable({
 }) {
   return (
     <>
-      {/* Desktop: table */}
       <div className="hidden overflow-hidden rounded-lg border border-border bg-card md:block">
         <table className="w-full text-sm">
           <thead>
@@ -80,7 +79,6 @@ export function ProjectTable({
         </table>
       </div>
 
-      {/* Mobile: cards */}
       <div className="space-y-3 md:hidden">
         {projects.map((p) => (
           <div key={p.id} className="rounded-lg border border-border bg-card p-4">

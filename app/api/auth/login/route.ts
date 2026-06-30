@@ -17,7 +17,6 @@ export async function POST(request: Request) {
 
   const { email, password } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });
-  // Same response for unknown email and wrong password to avoid user enumeration.
   if (!user || !(await verifyPassword(password, user.password))) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }

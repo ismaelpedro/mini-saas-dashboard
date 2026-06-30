@@ -6,7 +6,6 @@ export type TeamMember = {
   email: string;
 };
 
-// Budget is a Prisma Decimal, serialized to a string over the wire.
 export type Project = {
   id: string;
   name: string;
