@@ -33,4 +33,7 @@ export const projectSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
-export type ProjectInput = z.input<typeof projectSchema>;
+// z.input has a loose budget (pre-coercion) for the form; z.output is the
+// validated payload (budget: number) sent to the API.
+export type ProjectFormValues = z.input<typeof projectSchema>;
+export type ProjectPayload = z.output<typeof projectSchema>;
