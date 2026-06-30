@@ -185,17 +185,39 @@ See [`prisma/schema.prisma`](prisma/schema.prisma).
 npm test
 ```
 
-Covers the Zod schemas, the projects route handler (auth gating, ownership scoping, validation errors via mocked `db`/`dal`) and the `ProjectTable` component.
+- **Unit** (`tests/unit`): Zod schemas, formatters, `jose` session round-trip, bcrypt hashing and the `ProjectTable` component.
+- **Integration** (`tests/integration`): the real project route handlers run against a Postgres test database (create, list, filter, search, sort, update, delete, ownership, auth). Requires `TEST_DATABASE_URL` (see `.env.test.example`); otherwise the suite skips. Run with `npm run test:integration`.
 
 ## Deployment
 
-The app deploys to **Vercel** with any managed Postgres (Neon, Railway, Supabase):
+### Database on Supabase (PostgreSQL + auto-generated API)
 
-1. Create a managed PostgreSQL database and copy its connection string.
-2. Import the repo into Vercel; set `DATABASE_URL` and `JWT_SECRET` env vars.
-3. Add `prisma migrate deploy` to the build (or run it once against the managed DB), then optionally `npm run db:seed`.
+The schema runs on a managed **Supabase** Postgres. Use the connection **pooler** host
+(`Connect → Session pooler`); the direct `db.<ref>.supabase.co` host is not exposed on the
+free plan.
 
-The `Dockerfile` / `docker-compose.yml` also make it portable to any container host.
+```bash
+# Migrations & seeding — Session pooler, port 5432
+export DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require"
+npm run db:deploy   # prisma migrate deploy
+npm run db:seed
+
+# App runtime (serverless) — Transaction pooler, port 6543
+DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-1-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
+```
+
+Once the schema exists, Supabase **auto-generates a REST API** (PostgREST) over the tables,
+e.g. `GET https://<ref>.supabase.co/rest/v1/Project?select=*` with the project's API key.
+The app itself does not use it — it talks to Postgres directly through Prisma — so for a real
+deployment enable **Row Level Security** policies before exposing the anon key.
+
+### App on Vercel
+
+1. Import the repo into Vercel.
+2. Set env vars `DATABASE_URL` (Supabase transaction pooler) and `JWT_SECRET`.
+3. Run `prisma migrate deploy` against the database (and optionally `npm run db:seed`).
+
+The `Dockerfile` / `docker-compose.yml` also make the full stack portable to any container host.
 
 ## Project structure
 
