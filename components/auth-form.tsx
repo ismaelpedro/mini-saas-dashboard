@@ -34,7 +34,11 @@ const COPY = {
 
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
-  const from = useSearchParams().get("from") || "/";
+  const requestedFrom = useSearchParams().get("from") || "/";
+  const from =
+    requestedFrom.startsWith("/") && !requestedFrom.startsWith("//")
+      ? requestedFrom
+      : "/";
   const isRegister = mode === "register";
   const copy = COPY[mode];
 

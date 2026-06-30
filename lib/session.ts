@@ -13,7 +13,9 @@ export const sessionCookieOptions = {
 
 function secret() {
   const value = process.env.JWT_SECRET;
-  if (!value) throw new Error("JWT_SECRET environment variable is not set");
+  if (!value || value.length < 32) {
+    throw new Error("JWT_SECRET must be set and at least 32 characters long");
+  }
   return new TextEncoder().encode(value);
 }
 
