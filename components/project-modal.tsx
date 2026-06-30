@@ -78,7 +78,11 @@ export function ProjectModal({
   project: Project | null;
 }) {
   const isEdit = Boolean(project);
-  const { data: teamMembers = [], isLoading: loadingMembers } = useTeamMembers();
+  const {
+    data: teamMembers = [],
+    isLoading: loadingMembers,
+    isError: membersError,
+  } = useTeamMembers();
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
 
@@ -160,7 +164,14 @@ export function ProjectModal({
               <Input id="budget" type="number" step="0.01" min="0" {...register("budget")} />
             </Field>
 
-            <Field label="Team member" error={errors.teamMemberId?.message}>
+            <Field
+              label="Team member"
+              error={
+                membersError
+                  ? "Couldn't load team members"
+                  : errors.teamMemberId?.message
+              }
+            >
               <Controller
                 control={control}
                 name="teamMemberId"

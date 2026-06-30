@@ -1,8 +1,8 @@
 import "dotenv/config";
-import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 import { PrismaClient, type ProjectStatus } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { hashPassword } from "../lib/auth";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -49,7 +49,7 @@ async function main() {
     data: {
       email: DEMO_USER.email,
       name: DEMO_USER.name,
-      password: await bcrypt.hash(DEMO_USER.password, 10),
+      password: await hashPassword(DEMO_USER.password),
     },
   });
   console.log(`Seeded demo user ${demo.email} (password: ${DEMO_USER.password})`);
