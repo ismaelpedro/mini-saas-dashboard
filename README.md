@@ -4,6 +4,8 @@ A small but production-shaped full-stack dashboard to **list, filter, search, ad
 
 Built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma and PostgreSQL, with JWT authentication, a REST API, a seeded database, tests, Docker and CI.
 
+**🔗 Live demo:** <https://mini-saas-dashboard.onrender.com> — sign in with `demo@dimovtax.com` / `password123`. The database runs on Supabase; the app on Render's free tier, so the first request may take ~50s while the instance wakes.
+
 ![Dashboard](docs/screenshots/dashboard.png)
 
 <p align="center">
